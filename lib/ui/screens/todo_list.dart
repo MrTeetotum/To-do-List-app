@@ -12,77 +12,31 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      body: CustomScrollView(
-        slivers: <Widget>[
-          SliverToBoxAdapter(
-              child: Container(
-                  height: 100.0,
-                  child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: 10,
-                      itemBuilder: (context, index) {
-                        return Container(
-                            width: 100.0,
-                            child: Card(
-                              child: Text('data'),
-                            ));
-                      }))),
-          SliverAppBar(
-            titleSpacing: 50.0,
-            expandedHeight: 100.0,
-            flexibleSpace: const FlexibleSpaceBar(
-              titlePadding: EdgeInsetsDirectional.only(start: 16, bottom: 32),
-              title: Text(
-                "To-do list",
-                style: TextStyle(
-                  color: Colors.black,
-                ),
-              ),
-              centerTitle: false,
-            ),
-            floating: false,
-            pinned: false,
-            snap: false,
-            brightness: Brightness.light,
-            backgroundColor: Colors.transparent,
-          ),
-          new SliverList(
-            delegate: new SliverChildListDelegate(_buildList(50)),
-          ),
-        ],
-      ),
+    return Scaffold(
       bottomNavigationBar: BottomAppBar(
         child: Container(
-            height: 65.0,
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                IconButton(
-                  iconSize: 32.0,
-                  padding: EdgeInsets.only(left: 24.0),
-                  icon: Icon(Icons.menu),
-                  onPressed: () {},
-                ),
-                IconButton(
-                  iconSize: 32.0,
-                  padding: EdgeInsets.only(right: 24.0),
-                  icon: Icon(Icons.more_vert),
-                  onPressed: () {},
-                )
-              ],
-            )),
+          height: 65.0,
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              IconButton(
+                iconSize: 32.0,
+                padding: EdgeInsets.only(left: 24.0),
+                icon: Icon(Icons.menu),
+                onPressed: () {},
+              ),
+              IconButton(
+                iconSize: 32.0,
+                padding: EdgeInsets.only(right: 24.0),
+                icon: Icon(Icons.more_vert),
+                onPressed: () {},
+              )
+            ],
+          ),
+        ),
         elevation: 20.0,
         shape: CircularNotchedRectangle(),
       ),
@@ -90,11 +44,41 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.white,
         foregroundColor: Colors.blue,
-        onPressed: _incrementCounter,
+        onPressed: () {},
         tooltip: 'Add a task',
         child: Icon(
           Icons.add,
           size: 40.0,
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.only(top: 32.0),
+        child: Column(
+          children: <Widget>[
+            Container(
+              child: Text(
+                'To-do List',
+                textAlign: TextAlign.start,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 32.0,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 16.0),
+                child: Container(
+                  child: getDayList(),
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 3,
+              child: getTodoList(),
+            ),
+          ],
         ),
       ),
     );
@@ -104,13 +88,56 @@ class _MyHomePageState extends State<MyHomePage> {
     List<Widget> listItems = List();
 
     for (int i = 0; i < count; i++) {
-      listItems.add(new Padding(
-          padding: new EdgeInsets.all(20.0),
-          child: new Text('Item ${i.toString()}',
-              style: new TextStyle(fontSize: 25.0))));
+      listItems.add(
+        Padding(
+          padding: EdgeInsets.all(20.0),
+          child: Text(
+            'Item ${i.toString()}',
+            style: TextStyle(fontSize: 25.0),
+          ),
+        ),
+      );
     }
 
     return listItems;
+  }
+
+  Widget getDayList() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      child: CustomScrollView(
+        slivers: <Widget>[
+          SliverToBoxAdapter(
+            child: Container(
+              height: 80.0,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: 10,
+                itemBuilder: (context, index) {
+                  return Container(
+                    width: 80.0,
+                    child: Card(
+                      color: Colors.white70,
+                      child: Text('data'),
+                    ),
+                  );
+                },
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  CustomScrollView getTodoList() {
+    return CustomScrollView(
+      slivers: <Widget>[
+        SliverList(
+          delegate: SliverChildListDelegate(_buildList(50)),
+        ),
+      ],
+    );
   }
 
   List _buildDayList(int count) {
