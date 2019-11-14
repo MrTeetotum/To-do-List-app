@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:todoapp/ui/widget/new_todo_input_widget.dart';
 import '../../main.dart';
-import 'package:todoapp/ui/themeData.dart';
 import 'package:intl/intl.dart';
-import 'package:todoapp/ui/screens/todo_add.dart';
+import '../../data/moor_database.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -17,78 +18,66 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: BottomAppBar(
-        child: Container(
-          height: 65.0,
-          child: Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        bottomNavigationBar: BottomAppBar(
+          child: Container(
+            height: 65.0,
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                IconButton(
+                  iconSize: 32.0,
+                  padding: EdgeInsets.only(left: 24.0),
+                  icon: Icon(Icons.menu),
+                  onPressed: () {},
+                ),
+                IconButton(
+                  iconSize: 32.0,
+                  padding: EdgeInsets.only(right: 24.0),
+                  icon: Icon(Icons.more_vert),
+                  onPressed: () {},
+                )
+              ],
+            ),
+          ),
+          elevation: 20.0,
+          shape: CircularNotchedRectangle(),
+        ),
+        resizeToAvoidBottomPadding: false,
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: NewTodoInput(),
+        body: Padding(
+          padding: const EdgeInsets.only(top: 32.0),
+          child: Column(
             children: <Widget>[
-              IconButton(
-                iconSize: 32.0,
-                padding: EdgeInsets.only(left: 24.0),
-                icon: Icon(Icons.menu),
-                onPressed: () {},
+              Container(
+                child: Text(
+                  'To-do List',
+                  textAlign: TextAlign.start,
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 32.0,
+                  ),
+                ),
               ),
-              IconButton(
-                iconSize: 32.0,
-                padding: EdgeInsets.only(right: 24.0),
-                icon: Icon(Icons.more_vert),
-                onPressed: () {},
-              )
+              Expanded(
+                flex: 2,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Container(
+                    child: getDayList(),
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 5,
+                child: Container(
+                  child: _buildTaskList(context),
+                ),
+              ),
             ],
           ),
-        ),
-        elevation: 20.0,
-        shape: CircularNotchedRectangle(),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.blue,
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => todoAdd()),
-          );
-        },
-        tooltip: 'Add a task',
-        child: Icon(
-          Icons.add,
-          size: 40.0,
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.only(top: 32.0),
-        child: Column(
-          children: <Widget>[
-            Container(
-              child: Text(
-                'To-do List',
-                textAlign: TextAlign.start,
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 32.0,
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Container(
-                  child: getDayList(),
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 5,
-              child: Container(child: getTodoList()),
-            ),
-          ],
-        ),
-      ),
-    );
+        ));
   }
 
   Widget getDayList() {
@@ -136,83 +125,70 @@ class _MyHomePageState extends State<MyHomePage> {
     return formatedDate;
   }
 
-  CustomScrollView getTodoList() {
-    int length = 20;
-    var items = List.generate(50, (int index) => index);
+  StreamBuilder<List<Task>> _buildTaskList(BuildContext context) {
+    final database = Provider.of<AppDatabase>(context);
 
-    return CustomScrollView(
-      slivers: <Widget>[
-        SliverList(
-          delegate: SliverChildListDelegate(
-            List<Dismissible>.generate(
-              length,
-              (int index) {
-                return new Dismissible(
-                  direction: DismissDirection.startToEnd,
-                  key: Key(items.toString()),
-                  onDismissed: (direction) {
-                    print("$index is deleted");
-                    items.removeAt(index);
-                  },
-                  background: Container(
-                    color: Colors.red,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      ListTile(
-                        leading: Radio(
-                          value: false,
-                          onChanged: (bool newValue) {
-                            setState(() {});
-                          },
-                        ),
-                        title: Text(
-                          'Item ${index.toString()}',
-                          style: TextStyle(fontSize: 16.0),
-                        ),
-                      ),
-                      Divider(
-                        height: 8.0,
-                        color: Color.fromRGBO(150, 150, 150, 0.8),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
-      ],
+    return StreamBuilder(
+      stream: database.watchAllTasks(),
+      builder: (context, AsyncSnapshot<List<Task>> snapshot) {
+        final tasks = snapshot.data ?? List();
+
+        return ListView.builder(
+          itemCount: tasks.length,
+          itemBuilder: (_, index) {
+            final itemTask = tasks[index];
+            return _buildListItem(itemTask, database);
+          },
+        );
+      },
     );
   }
 
-  // List _buildList(int count) {
-  //   List<Widget> listItems = List();
-
-  //   for (int i = 0; i < count; i++) {
-  //     listItems.add(Column(
-  //       children: <Widget>[
-  //         ListTile(
-  //           leading: Radio(
-  //             value: false,
-  //             onChanged: (bool newValue) {
-  //               setState(() {});
-  //             },
-  //           ),
-  //           title: Text(
-  //             'Item ${i.toString()}',
-  //             style: TextStyle(fontSize: 16.0),
-  //           ),
-  //         ),
-  //         Divider(
-  //           height: 8.0,
-  //           color: Color.fromRGBO(150, 150, 150, 0.8),
-  //         ),
-  //       ],
-  //     ));
-  //   }
-
-  //   return listItems;
-  // }
+  Widget _buildListItem(Task itemTask, AppDatabase database) {
+    return Dismissible(
+      direction: DismissDirection.startToEnd,
+      key: Key(itemTask.id.toString()),
+      onDismissed: (direction) {
+        database.deleteTask(itemTask);
+      },
+      background: Container(
+        color: Colors.blue,
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Padding(
+            padding: const EdgeInsets.only(left: 16.0),
+            child: Icon(
+              Icons.check,
+              color: Colors.white,
+              size: 32.0,
+            ),
+          ),
+        ),
+      ),
+      secondaryBackground: Container(
+        color: Colors.red,
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Icon(Icons.delete),
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          CheckboxListTile(
+              title: Text(itemTask.name),
+              subtitle: Text(itemTask.dueDate?.toString() ?? ''),
+              value: itemTask.completed,
+              controlAffinity: ListTileControlAffinity.leading,
+              onChanged: (newValue) {
+                database.updateTask(itemTask.copyWith(completed: newValue));
+              }),
+          Divider(
+            height: 8.0,
+            color: Color.fromRGBO(150, 150, 150, 0.8),
+          ),
+        ],
+      ),
+    );
+  }
 }
