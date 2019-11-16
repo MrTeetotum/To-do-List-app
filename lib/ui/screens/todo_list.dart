@@ -146,7 +146,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _buildListItem(Task itemTask, AppDatabase database) {
     return Dismissible(
-      direction: DismissDirection.startToEnd,
+      direction: DismissDirection.horizontal,
       key: Key(itemTask.id.toString()),
       onDismissed: (direction) {
         database.deleteTask(itemTask);
@@ -168,21 +168,27 @@ class _MyHomePageState extends State<MyHomePage> {
       secondaryBackground: Container(
         color: Colors.red,
         child: Align(
-          alignment: Alignment.centerLeft,
-          child: Icon(Icons.delete),
+          alignment: Alignment.centerRight,
+          child: Icon(
+            Icons.delete,
+            color: Colors.white,
+            size: 32.0,
+          ),
         ),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           CheckboxListTile(
-              title: Text(itemTask.name),
-              subtitle: Text(itemTask.dueDate?.toString() ?? ''),
-              value: itemTask.completed,
-              controlAffinity: ListTileControlAffinity.leading,
-              onChanged: (newValue) {
-                database.updateTask(itemTask.copyWith(completed: newValue));
-              }),
+            title: Text(itemTask.name),
+            subtitle: Text(itemTask.dueDate?.toString() ?? ''),
+            value: itemTask.completed,
+            controlAffinity: ListTileControlAffinity.leading,
+            onChanged: (newValue) {
+              // database.updateTask(itemTask.copyWith(completed: newValue));
+              database.deleteTask(itemTask);
+            },
+          ),
           Divider(
             height: 8.0,
             color: Color.fromRGBO(150, 150, 150, 0.8),

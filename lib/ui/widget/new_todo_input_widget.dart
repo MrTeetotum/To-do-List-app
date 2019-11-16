@@ -13,13 +13,15 @@ class NewTodoInput extends StatefulWidget {
 
 class _NewTodoInputState extends State<NewTodoInput> {
   DateTime newTodoDate;
-  TextEditingController controller;
+  TextEditingController todoInputController;
+  String inputValue;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    controller = TextEditingController();
+    todoInputController = TextEditingController();
+    inputValue = todoInputController.text;
   }
 
   @override
@@ -30,11 +32,14 @@ class _NewTodoInputState extends State<NewTodoInput> {
       onPressed: () {
         showModalBottomSheet(
           context: context,
+          isScrollControlled: true,
           clipBehavior: Clip.antiAlias,
-          builder: (context) => Padding(
+          builder: (context) => AnimatedPadding(
             padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
+              bottom: (MediaQuery.of(context).viewInsets.bottom),
             ),
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOutCirc,
             child: Container(
               height: 100.0,
               child: Column(
@@ -45,9 +50,38 @@ class _NewTodoInputState extends State<NewTodoInput> {
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
-                      _buildDateButton(context),
-                      Text(
-                        'Save',
+                      Row(
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.only(left: 16.0),
+                            child: _buildDateButton(context),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: _buildDetailsButton(context),
+                          ),
+                        ],
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          var input = inputValue;
+                          print(input);
+                          insertNewTodo(input);
+
+                          Navigator.pop(context);
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 16.0),
+                          child: Container(
+                            child: Text(
+                              'Save',
+                              style: TextStyle(
+                                fontSize: 18.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
                       )
                     ],
                   ),
@@ -68,20 +102,44 @@ class _NewTodoInputState extends State<NewTodoInput> {
   TextField _buildTextField(BuildContext context) {
     return TextField(
       autofocus: true,
-      controller: controller,
+      controller: todoInputController,
       decoration: InputDecoration(
         hintText: 'New to-do',
         hintStyle: TextStyle(
             fontWeight: FontWeight.bold, color: Color.fromRGBO(0, 0, 0, 0.4)),
         disabledBorder: InputBorder.none,
       ),
-      onSubmitted: (inputName) {
-        final database = Provider.of<AppDatabase>(context);
-        final task = Task(
-          name: inputName,
-          dueDate: newTodoDate,
+      onChanged: (String input) {
+        inputValue = todoInputController.text;
+      },
+      onSubmitted: (input) {
+        print(input);
+        insertNewTodo(input);
+        Navigator.pop(context);
+      },
+    );
+  }
+
+  Future insertNewTodo(String input) {
+    final database = Provider.of<AppDatabase>(context);
+    final task = Task(
+      name: input,
+      dueDate: newTodoDate,
+    );
+    todoInputController.text = '';
+    return database.insertTask(task);
+  }
+
+  IconButton _buildDetailsButton(BuildContext context) {
+    return IconButton(
+      icon: Icon(Icons.mode_comment),
+      onPressed: () async {
+        newTodoDate = await showDatePicker(
+          context: context,
+          initialDate: DateTime.now(),
+          firstDate: DateTime(2015),
+          lastDate: DateTime(2050),
         );
-        database.insertTask(task);
       },
     );
   }
