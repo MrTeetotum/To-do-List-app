@@ -15,6 +15,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  bool showCompleted = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,6 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
               ),
+              _buildCompletedOnlySwitch(),
               Expanded(
                 flex: 2,
                 child: Padding(
@@ -126,10 +129,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   StreamBuilder<List<Task>> _buildTaskList(BuildContext context) {
-    final database = Provider.of<AppDatabase>(context);
+    final dao = Provider.of<TodoDao>(context);
 
     return StreamBuilder(
-      stream: database.watchAllTasks(),
+      stream: showCompleted ? dao.watchCompletedTasks() : dao.watchAllTasks(),
       builder: (context, AsyncSnapshot<List<Task>> snapshot) {
         final tasks = snapshot.data ?? List();
 
@@ -137,19 +140,19 @@ class _MyHomePageState extends State<MyHomePage> {
           itemCount: tasks.length,
           itemBuilder: (_, index) {
             final itemTask = tasks[index];
-            return _buildListItem(itemTask, database);
+            return _buildListItem(itemTask, dao);
           },
         );
       },
     );
   }
 
-  Widget _buildListItem(Task itemTask, AppDatabase database) {
+  Widget _buildListItem(Task itemTask, TodoDao dao) {
     return Dismissible(
       direction: DismissDirection.horizontal,
       key: Key(itemTask.id.toString()),
       onDismissed: (direction) {
-        database.deleteTask(itemTask);
+        dao.deleteTask(itemTask);
       },
       background: Container(
         color: Colors.blue,
@@ -185,8 +188,8 @@ class _MyHomePageState extends State<MyHomePage> {
             value: itemTask.completed,
             controlAffinity: ListTileControlAffinity.leading,
             onChanged: (newValue) {
-              // database.updateTask(itemTask.copyWith(completed: newValue));
-              database.deleteTask(itemTask);
+              dao.updateTask(itemTask.copyWith(completed: newValue));
+              // dao.deleteTask(itemTask);
             },
           ),
           Divider(
@@ -195,6 +198,22 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
+    );
+  }
+
+  Row _buildCompletedOnlySwitch() {
+    return Row(
+      children: <Widget>[
+        Text('Completed only'),
+        Switch(
+            value: showCompleted,
+            activeColor: Colors.blueAccent,
+            onChanged: (newValue) {
+              setState(() {
+                showCompleted = newValue;
+              });
+            })
+      ],
     );
   }
 }

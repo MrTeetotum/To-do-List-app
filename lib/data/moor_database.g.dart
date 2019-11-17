@@ -246,6 +246,39 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
   $TasksTable _tasks;
   $TasksTable get tasks => _tasks ??= $TasksTable(this);
+  TodoDao _todoDao;
+  TodoDao get todoDao => _todoDao ??= TodoDao(this as AppDatabase);
   @override
   List<TableInfo> get allTables => [tasks];
+}
+
+// **************************************************************************
+// DaoGenerator
+// **************************************************************************
+
+mixin _$TodoDaoMixin on DatabaseAccessor<AppDatabase> {
+  $TasksTable get tasks => db.tasks;
+  Task _rowToTask(QueryRow row) {
+    return Task(
+      id: row.readInt('id'),
+      name: row.readString('name'),
+      dueDate: row.readDateTime('due_date'),
+      completed: row.readBool('completed'),
+    );
+  }
+
+  Selectable<Task> completedTasksGeneratedQuery() {
+    return customSelectQuery(
+        'SELECT * FROM tasks WHERE completed = 1 ORDER BY due_date DESC, name;',
+        variables: [],
+        readsFrom: {tasks}).map(_rowToTask);
+  }
+
+  Future<List<Task>> completedTasksGenerated() {
+    return completedTasksGeneratedQuery().get();
+  }
+
+  Stream<List<Task>> watchCompletedTasksGenerated() {
+    return completedTasksGeneratedQuery().watch();
+  }
 }

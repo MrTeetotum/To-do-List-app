@@ -10,7 +10,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Provider(
-      builder: (_) => AppDatabase(),
+      builder: (_) => AppDatabase().todoDao,
       child: MaterialApp(
         title: 'Flutter Demo',
         home: MyHomePage(title: 'Flutter Demo Home Page'),

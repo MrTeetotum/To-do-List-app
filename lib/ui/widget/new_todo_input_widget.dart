@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:moor_flutter/moor_flutter.dart' hide Column;
 import 'package:provider/provider.dart';
-import '../../main.dart';
-import 'package:intl/intl.dart';
 import '../../data/moor_database.dart';
 
 class NewTodoInput extends StatefulWidget {
@@ -121,13 +120,13 @@ class _NewTodoInputState extends State<NewTodoInput> {
   }
 
   Future insertNewTodo(String input) {
-    final database = Provider.of<AppDatabase>(context);
-    final task = Task(
-      name: input,
-      dueDate: newTodoDate,
+    final dao = Provider.of<TodoDao>(context);
+    final task = TasksCompanion(
+      name: Value(input),
+      dueDate: Value(newTodoDate),
     );
     todoInputController.text = '';
-    return database.insertTask(task);
+    return dao.insertTask(task);
   }
 
   IconButton _buildDetailsButton(BuildContext context) {
