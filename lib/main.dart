@@ -9,8 +9,12 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return Provider(
-      builder: (_) => AppDatabase().todoDao,
+    final db = AppDatabase();
+    return MultiProvider(
+      providers: [
+        Provider(builder: (_) => db.todoDao),
+        Provider(builder: (_) => db.tagDao),
+      ],
       child: MaterialApp(
         title: 'Flutter Demo',
         home: MyHomePage(title: 'Flutter Demo Home Page'),
