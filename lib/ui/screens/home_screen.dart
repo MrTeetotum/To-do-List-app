@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:todoapp/ui/widget/new_todo_input_widget.dart';
 import 'package:todoapp/ui/widget/todo_list_builder.dart';
+import 'package:todoapp/ui/widget/done_todo_list_builder.dart';
 import '../../main.dart';
 import 'package:intl/intl.dart';
 import '../../data/moor_database.dart';
@@ -63,7 +64,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
               ),
-              _buildCompletedOnlySwitch(),
               Expanded(
                 flex: 3,
                 child: Padding(
@@ -77,6 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
               Expanded(
                 flex: 7,
                 child: TodoListBuilder(),
+                // TODO ExpansionTile()
               ),
             ],
           ),

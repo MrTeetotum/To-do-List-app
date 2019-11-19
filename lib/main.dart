@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:todoapp/data/moor_database.dart';
-import 'package:todoapp/ui/screens/todo_list.dart';
+import 'package:todoapp/ui/screens/home_screen.dart';
 import 'package:provider/provider.dart';
 
 void main() => runApp(MyApp());
