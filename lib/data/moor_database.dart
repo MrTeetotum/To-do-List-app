@@ -96,6 +96,8 @@ class TodoDao extends DatabaseAccessor<AppDatabase> with _$TodoDaoMixin {
         .watch();
   }
 
+  Future<List<Task>> getCompletedTasks() {}
+
   Future insertTask(Insertable<Task> task) => into(tasks).insert(task);
   Future updateTask(Insertable<Task> task) => update(tasks).replace(task);
   Future deleteTask(Insertable<Task> task) => delete(tasks).delete(task);
